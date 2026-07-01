@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Helpers\StringHelper;
+use Laravel\Sanctum\Sanctum;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -27,6 +28,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Sanctum::getAccessTokenFromRequestUsing(function ($request) {
+            $token = $request->query('token') ?? $request->bearerToken();
+
+            return $token
+                ? \Laravel\Sanctum\PersonalAccessToken::findToken($token)
+                : null;
+        });
     }
 }
