@@ -4,14 +4,22 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\Response;
 
 class TokenQueryParameter
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($token = $request->query('token')) {
-            $request->headers->set('Authorization', "Bearer {$token}");
+        $token = $request->query('token') ?? $request->bearerToken();
+
+        if ($token) {
+            $accessToken = PersonalAccessToken::findToken($token);
+
+            if ($accessToken) {
+                Auth::login($accessToken->tokenable);
+            }
         }
 
         return $next($request);
