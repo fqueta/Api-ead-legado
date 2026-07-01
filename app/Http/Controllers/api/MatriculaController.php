@@ -103,6 +103,52 @@ class MatriculaController extends Controller
         return new MatriculaResource($matricula->load(['cliente', 'curso', 'turma']));
     }
 
+    public function export(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $query = Matricula::where('excluido', 'n')->where('deletado', 'n')
+            ->with(['cliente', 'curso', 'turma']);
+
+        if ($request->filled('id_cliente')) {
+            $query->where('id_cliente', $request->id_cliente);
+        }
+
+        if ($request->filled('id_curso')) {
+            $query->where('id_curso', $request->id_curso);
+        }
+
+        if ($request->filled('id_turma')) {
+            $query->where('id_turma', $request->id_turma);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('ativo')) {
+            $query->where('ativo', $request->ativo);
+        }
+
+        $matriculas = $query->orderBy('id', 'desc')->get();
+
+        $data = $matriculas->map(function ($matricula) {
+            return [
+                'id_antigo' => (string) $matricula->id,
+                'user_email' => $matricula->cliente->Email ?? $matricula->cliente->email ?? '',
+                'course_id_wp' => (string) ($matricula->curso->id ?? ''),
+                'status' => $matricula->status,
+                'start_at' => $matricula->data_inicio ? $matricula->data_inicio->format('Y-m-d H:i:s') : null,
+                'end_at' => null,
+                'order_id_wp' => '',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'total' => $data->count(),
+            'data' => $data,
+        ]);
+    }
+
     public function destroy($id): \Illuminate\Http\JsonResponse
     {
         $matricula = Matricula::where('excluido', 'n')->where('deletado', 'n')

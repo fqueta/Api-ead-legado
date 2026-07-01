@@ -85,4 +85,68 @@ class TurmaController extends Controller
 
         return response()->json(['message' => 'Turma excluída com sucesso']);
     }
+
+    public function export(Request $request)
+    {
+        $query = Turma::where('excluido', 'n')->where('deletado', 'n')
+            ->with(['curso', 'matriculas']);
+
+        if ($request->filled('id_curso')) {
+            $query->where('id_curso', $request->id_curso);
+        }
+
+        if ($request->filled('ativo')) {
+            $query->where('ativo', $request->ativo);
+        }
+
+        if ($request->filled('data_inicio')) {
+            $query->whereDate('data_inicio', '>=', $request->data_inicio);
+        }
+
+        if ($request->filled('data_fim')) {
+            $query->whereDate('data_inicio', '<=', $request->data_fim);
+        }
+
+        $turmas = $query->orderBy('nome')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="turmas.csv"',
+        ];
+
+        $callback = function () use ($turmas) {
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($output, [
+                'ID',
+                'Curso',
+                'Turma',
+                'Início',
+                'Fim',
+                'Data Início',
+                'Máx. Alunos',
+                'Matriculados',
+                'Ativo',
+            ]);
+
+            foreach ($turmas as $turma) {
+                fputcsv($output, [
+                    $turma->id,
+                    $turma->curso->nome ?? '',
+                    $turma->nome,
+                    $turma->inicio ? $turma->inicio->format('d/m/Y') : '',
+                    $turma->fim ? $turma->fim->format('d/m/Y') : '',
+                    $turma->data_inicio ? $turma->data_inicio->format('d/m/Y') : '',
+                    $turma->max_alunos ?? '',
+                    $turma->matriculas->count(),
+                    $turma->ativo === 's' ? 'Sim' : 'Não',
+                ]);
+            }
+
+            fclose($output);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

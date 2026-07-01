@@ -111,8 +111,11 @@ Route::name('api.')->prefix('api/v1')->middleware([
         Route::put('/cursos/{id}', [CursoController::class, 'update']);
         Route::delete('/cursos/{id}', [CursoController::class, 'destroy']);
 
+        Route::get('/turmas/export', [TurmaController::class, 'export'])->name('turmas.export');
         Route::apiResource('turmas', TurmaController::class);
+        Route::get('/matriculas/export', [MatriculaController::class, 'export'])->name('matriculas.export');
         Route::apiResource('matriculas', MatriculaController::class);
+        Route::get('/clientes/export', [ClienteController::class, 'export'])->name('clientes.export');
         Route::apiResource('clientes', ClienteController::class);
     });
 });
