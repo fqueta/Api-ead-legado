@@ -106,10 +106,14 @@ class CursoResource extends JsonResource
     {
         $videoUrl = '';
 
-        if ($atividade->tipo_link_video === 'y' || $atividade->tipo_link_video === 'youtube') {
-            $videoUrl = $atividade->video ? "https://www.youtube.com/watch?v={$atividade->video}" : '';
-        } elseif ($atividade->tipo === 'video' || $atividade->tipo === 'Video') {
-            $videoUrl = $atividade->video ? "https://player.vimeo.com/video/{$atividade->video}" : '';
+        if ($atividade->video) {
+            if (str_starts_with($atividade->video, 'http')) {
+                $videoUrl = $atividade->video;
+            } elseif ($atividade->tipo_link_video === 'y' || $atividade->tipo_link_video === 'youtube') {
+                $videoUrl = "https://www.youtube.com/watch?v={$atividade->video}";
+            } elseif ($atividade->tipo_link_video === 'v' || strtolower($atividade->tipo ?? '') === 'video') {
+                $videoUrl = "https://player.vimeo.com/video/{$atividade->video}";
+            }
         }
 
         return [
