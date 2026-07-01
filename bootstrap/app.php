@@ -21,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        $middleware->alias([
+            'token.query' => \App\Http\Middleware\TokenQueryParameter::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

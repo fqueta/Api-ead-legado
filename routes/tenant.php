@@ -52,10 +52,9 @@ Route::name('api.')->prefix('api/v1')->middleware([
     Route::post('/login',[AuthController::class,'login']);
     Route::post('/login-cliente',[AuthController::class,'loginCliente']);
 
-    Route::get('/cursos', [CursoController::class, 'index']);
-    Route::get('/cursos/{id}', [CursoController::class, 'show']);
-
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['token.query', 'auth:sanctum'])->group(function () {
+        Route::get('/cursos', [CursoController::class, 'index']);
+        Route::get('/cursos/{id}', [CursoController::class, 'show']);
         Route::post('/add-presenca-massa', [Escola::class,'add_presenca'])->name('add_presenca');
 
         Route::post('/cursos', [CursoController::class, 'store']);
