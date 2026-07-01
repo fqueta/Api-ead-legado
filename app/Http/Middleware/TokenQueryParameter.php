@@ -18,7 +18,7 @@ class TokenQueryParameter
             $accessToken = PersonalAccessToken::findToken($token);
 
             if ($accessToken) {
-                Auth::login($accessToken->tokenable);
+                Auth::guard('sanctum')->login($accessToken->tokenable);
             }
         }
 
