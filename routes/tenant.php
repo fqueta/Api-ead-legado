@@ -8,6 +8,7 @@ use App\Http\Controllers\api\CursoController;
 use App\Http\Controllers\api\MatriculaController;
 use App\Http\Controllers\api\TurmaController;
 use App\Http\Controllers\TesteController;
+use App\Http\Middleware\TokenQueryParameter;
 use App\Services\Escola;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -52,7 +53,7 @@ Route::name('api.')->prefix('api/v1')->middleware([
     Route::post('/login',[AuthController::class,'login']);
     Route::post('/login-cliente',[AuthController::class,'loginCliente']);
 
-    Route::middleware(['token.query', 'auth:sanctum'])->group(function () {
+    Route::middleware([TokenQueryParameter::class, 'auth:sanctum'])->group(function () {
         Route::get('/cursos', [CursoController::class, 'index']);
         Route::get('/cursos/{id}', [CursoController::class, 'show']);
         Route::post('/add-presenca-massa', [Escola::class,'add_presenca'])->name('add_presenca');
