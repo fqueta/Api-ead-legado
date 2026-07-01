@@ -12,14 +12,8 @@ class TokenQueryParameter
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->query('token') ?? $request->bearerToken();
-
-        if ($token) {
-            $accessToken = PersonalAccessToken::findToken($token);
-
-            if ($accessToken) {
-                Auth::guard('sanctum')->login($accessToken->tokenable);
-            }
+        if ($token = $request->query('token')) {
+            $request->headers->set('Authorization', "Bearer {$token}");
         }
 
         return $next($request);

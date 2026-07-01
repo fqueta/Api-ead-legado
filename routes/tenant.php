@@ -50,6 +50,13 @@ Route::name('api.')->prefix('api/v1')->middleware([
     Route::fallback(function () {
         return view('erro404_site');
     });
+    Route::get('/debug-token', function (\Illuminate\Http\Request $r) {
+        return response()->json([
+            'query_token' => $r->query('token'),
+            'bearer' => $r->bearerToken(),
+            'all_query' => $r->all(),
+        ]);
+    });
     Route::post('/login',[AuthController::class,'login']);
     Route::post('/login-cliente',[AuthController::class,'loginCliente']);
 
