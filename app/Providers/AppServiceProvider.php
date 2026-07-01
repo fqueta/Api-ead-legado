@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Helpers\StringHelper;
+use Laravel\Sanctum\Sanctum;
+use App\Models\PersonalAccessToken;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -27,6 +30,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Usa o modelo customizado que aponta para o banco 'tenant'
+        // para que o Sanctum consiga resolver tokens criados no contexto multi-tenant
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
+        // Ensina o Sanctum a buscar o token tanto no Header quanto no parâmetro ?token= da URL
+        Sanctum::getAccessTokenFromRequestUsing(function ($request) {
+            return $request->bearerToken() ?? $request->query('token');
+        });
     }
 }

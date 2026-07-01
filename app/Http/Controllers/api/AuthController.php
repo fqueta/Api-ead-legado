@@ -11,21 +11,34 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $key = 'email';
-        $credentials = [$key => $request->email, 'password' => $request->password, 'ativo' => 's', 'excluido' => 'n'];
-        $logar = Auth::guard('web')->attempt($credentials, $request->filled('remember'));
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-        if ($logar) {
-            return response()->json([
-                'message' => 'Authorized',
-                'status' => 200,
-                'data' => [
-                    'token' => $request->user()->createToken('developer')->plainTextToken,
-                ],
-            ]);
+        $credentials = [
+            'email'    => $request->email,
+            'password' => $request->password,
+            'ativo'    => 's',
+            'excluido' => 'n',
+        ];
+
+        // Auth::attempt() usa o guard padrão (web) que usa o provider 'users'.
+        // Com o tenant já inicializado pelo middleware, a connection ativa é a do tenant.
+        if (! Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Sem Autorização', 'status' => 403]);
         }
 
-        return response()->json(['message' => 'Sem Autorização', 'status' => 403]);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        return response()->json([
+            'message' => 'Authorized',
+            'status'  => 200,
+            'data'    => [
+                'token' => $user->createToken('developer')->plainTextToken,
+            ],
+        ]);
     }
 
     public function loginCliente(Request $request)

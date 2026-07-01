@@ -12,8 +12,10 @@ class TokenQueryParameter
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($token = $request->query('token')) {
-            $request->headers->set('Authorization', "Bearer {$token}");
+        $token = $request->query('token');
+
+        if ($token && ! $request->bearerToken()) {
+            $request->headers->set('Authorization', 'Bearer ' . $token);
         }
 
         return $next($request);

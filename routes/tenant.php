@@ -10,6 +10,7 @@ use App\Http\Controllers\api\TurmaController;
 use App\Http\Controllers\TesteController;
 use App\Http\Middleware\TokenQueryParameter;
 use App\Services\Escola;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -51,14 +52,55 @@ Route::name('api.')->prefix('api/v1')->middleware([
         return view('erro404_site');
     });
     Route::get('/debug-token', function (\Illuminate\Http\Request $r) {
+        $rawToken = $r->bearerToken() ?? $r->query('token');
+        $tokenHash = null;
+        $tokenRecord = null;
+
+        if ($rawToken) {
+            // O formato do Sanctum é: id|hash
+            $parts = explode('|', $rawToken, 2);
+            if (count($parts) === 2) {
+                $tokenHash = hash('sha256', $parts[1]);
+                $tokenRecord = \Laravel\Sanctum\PersonalAccessToken::where('id', $parts[0])
+                    ->first();
+            }
+        }
+
         return response()->json([
-            'query_token' => $r->query('token'),
-            'bearer' => $r->bearerToken(),
-            'all_query' => $r->all(),
+            'bearer_token'         => $r->bearerToken(),
+            'query_token'          => $r->query('token'),
+            'authorization_header' => $r->header('Authorization'),
+            'token_id'             => isset($parts[0]) ? $parts[0] : null,
+            'token_hash_sha256'    => $tokenHash,
+            'token_db_record'      => $tokenRecord ? [
+                'id'             => $tokenRecord->id,
+                'tokenable_type' => $tokenRecord->tokenable_type,
+                'tokenable_id'   => $tokenRecord->tokenable_id,
+                'name'           => $tokenRecord->name,
+                'token_match'    => $tokenRecord->token === $tokenHash,
+            ] : 'NOT FOUND IN DB',
+            'db_connection'        => \DB::connection()->getDatabaseName(),
+            'tenant'               => tenant('id'),
         ]);
     });
     Route::post('/login',[AuthController::class,'login']);
     Route::post('/login-cliente',[AuthController::class,'loginCliente']);
+
+    Route::get('/teste-mw', function (Request $r) {
+        return response()->json([
+            'middleware' => 'TESTE MW',
+            'query_token' => $r->query('token'),
+            'bearer' => $r->bearerToken(),
+        ]);
+    });
+
+    Route::get('/teste-mw2', function (Request $r) {
+        return response()->json([
+            'message' => 'MIDDLEWARE TQP ONLY',
+            'query_token' => $r->query('token'),
+            'bearer' => $r->bearerToken(),
+        ]);
+    })->middleware(TokenQueryParameter::class);
 
     Route::middleware([TokenQueryParameter::class, 'auth:sanctum'])->group(function () {
         Route::get('/cursos', [CursoController::class, 'index']);
