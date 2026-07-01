@@ -13,7 +13,6 @@ class AdminUserSeeder extends Seeder
             ['email' => 'fernando@maisaqui.com.br'],
             [
                 'name' => 'Fernando',
-                'empresa' => 'Mais Aqui',
                 'password' => bcrypt('123456'),
                 'email_verified_at' => now(),
             ]
