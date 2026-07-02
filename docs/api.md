@@ -298,14 +298,27 @@ GET /api/v1/matriculas/export
     "total": 699,
     "data": [
         {
-            "id_antigo": "1",
-            "id_turma": null,
-            "user_email": "andre.fialho.br@gmail.com",
-            "course_id_wp": "11427",
-            "status": "completed",
-            "start_at": "2020-07-16 23:35:51",
-            "end_at": null,
-            "order_id_wp": ""
+            "ativo": "s",
+            "desconto": "0.00",
+            "id": "1",
+            "id_cliente": "019ee1b0-6bd0-706d-bb09-2454201e71e8",
+            "id_consultor": "019eb0af-8aac-7215-9fec-3419ce303cc6",
+            "id_curso": "2",
+            "id_responsavel": "019eb0af-8aac-7215-9fec-3419ce303cc6",
+            "id_turma": "0",
+            "inscricao": "0.00",
+            "meta": {
+                "gera_valor": "",
+                "parcelada": false,
+                "parcelas": "12",
+                "texto_desconto": "",
+                "validade": "14"
+            },
+            "obs": "",
+            "orc": [],
+            "situacao_id": "17",
+            "subtotal": "249.00",
+            "total": "249.00"
         }
     ]
 }

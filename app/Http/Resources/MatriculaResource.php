@@ -9,12 +9,13 @@ class MatriculaResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        // Extract financial data from orc array
+        // Extract financial data from orc array, fallback to curso values
         $orc = is_array($this->orc) ? $this->orc : [];
+        $curso = $this->curso;
         $desconto = isset($orc['desconto']) ? (string) $orc['desconto'] : '0.00';
-        $inscricao = isset($orc['inscricao']) ? (string) $orc['inscricao'] : '0.00';
-        $subtotal = isset($orc['subtotal']) ? (string) $orc['subtotal'] : '0.00';
-        $total = isset($orc['total']) ? (string) $orc['total'] : '0.00';
+        $inscricao = isset($orc['inscricao']) ? (string) $orc['inscricao'] : ($curso ? (string) $curso->inscricao : '0.00');
+        $subtotal = isset($orc['subtotal']) ? (string) $orc['subtotal'] : ($curso ? (string) $curso->valor : '0.00');
+        $total = isset($orc['total']) ? (string) $orc['total'] : ($curso ? (string) $curso->valor : '0.00');
         $gera_valor = isset($orc['meta']['gera_valor']) ?? '';
         $parcelada = isset($orc['meta']['parcelada']) ? (bool) $orc['meta']['parcelada'] : false;
         $parcelas = isset($orc['meta']['parcelas']) ? (string) $orc['meta']['parcelas'] : '12';

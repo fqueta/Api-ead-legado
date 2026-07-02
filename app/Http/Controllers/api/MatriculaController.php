@@ -130,17 +130,8 @@ class MatriculaController extends Controller
 
         $matriculas = $query->orderBy('id', 'desc')->get();
 
-        $data = $matriculas->map(function ($matricula) {
-            return [
-                'id_antigo' => (string) $matricula->id,
-                'id_turma' => $matricula->id_turma,
-                'user_email' => $matricula->cliente->Email ?? $matricula->cliente->email ?? '',
-                'course_id_wp' => (string) ($matricula->curso->id ?? ''),
-                'status' => $matricula->status,
-                'start_at' => $matricula->data_inicio ? $matricula->data_inicio->format('Y-m-d H:i:s') : null,
-                'end_at' => null,
-                'order_id_wp' => '',
-            ];
+        $data = $matriculas->map(function ($matricula) use ($request) {
+            return (new MatriculaResource($matricula))->toArray($request);
         });
 
         return response()->json([
