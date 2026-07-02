@@ -133,6 +133,7 @@ class MatriculaController extends Controller
         $data = $matriculas->map(function ($matricula) {
             return [
                 'id_antigo' => (string) $matricula->id,
+                'id_turma' => $matricula->id_turma,
                 'user_email' => $matricula->cliente->Email ?? $matricula->cliente->email ?? '',
                 'course_id_wp' => (string) ($matricula->curso->id ?? ''),
                 'status' => $matricula->status,

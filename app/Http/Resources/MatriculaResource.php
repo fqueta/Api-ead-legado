@@ -9,27 +9,46 @@ class MatriculaResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        // Extract financial data from orc array
+        $orc = is_array($this->orc) ? $this->orc : [];
+        $desconto = isset($orc['desconto']) ? (string) $orc['desconto'] : '0.00';
+        $inscricao = isset($orc['inscricao']) ? (string) $orc['inscricao'] : '0.00';
+        $subtotal = isset($orc['subtotal']) ? (string) $orc['subtotal'] : '0.00';
+        $total = isset($orc['total']) ? (string) $orc['total'] : '0.00';
+        $gera_valor = isset($orc['meta']['gera_valor']) ?? '';
+        $parcelada = isset($orc['meta']['parcelada']) ? (bool) $orc['meta']['parcelada'] : false;
+        $parcelas = isset($orc['meta']['parcelas']) ? (string) $orc['meta']['parcelas'] : '12';
+        $texto_desconto = isset($orc['meta']['texto_desconto']) ?? '';
+        $validade_meta = isset($orc['meta']['validade']) ? (string) $orc['meta']['validade'] : '';
+        
+        // Extract additional data from config array
+        $config = is_array($this->config) ? $this->config : [];
+        $id_consultor = isset($config['id_consultor']) ? (string) $config['id_consultor'] : '';
+        $id_responsavel = isset($config['id_responsavel']) ? (string) $config['id_responsavel'] : '';
+        $situacao_id = isset($config['situacao_id']) ? (string) $config['situacao_id'] : '';
+
         return [
+            'ativo' => $this->ativo,
+            'desconto' => $desconto,
             'id' => $this->id,
             'id_cliente' => $this->id_cliente,
+            'id_consultor' => $id_consultor,
             'id_curso' => $this->id_curso,
-            'id_turma' => $this->id_turma,
-            'cliente' => new ClienteResource($this->whenLoaded('cliente')),
-            'curso' => new CursoResource($this->whenLoaded('curso')),
-            'turma' => new TurmaResource($this->whenLoaded('turma')),
-            'token' => $this->token,
-            'status' => $this->status,
-            'validade' => $this->validade,
-            'data_inicio' => $this->data_inicio,
-            'contrato' => $this->contrato,
-            'pagamento_asaas' => $this->pagamento_asaas,
-            'ativo' => $this->ativo,
-            'numero_aluno' => $this->numero_aluno,
-            'config' => $this->config,
-            'tipo_curso' => $this->tipo_curso,
+            'id_responsavel' => $id_responsavel,
+            'id_turma' => $this->id_turma ?: '0', // Ensure we return '0' for null/empty
+            'inscricao' => $inscricao,
+            'meta' => [
+                'gera_valor' => $gera_valor,
+                'parcelada' => $parcelada,
+                'parcelas' => $parcelas,
+                'texto_desconto' => $texto_desconto,
+                'validade' => $validade_meta,
+            ],
+            'obs' => $this->memo ?? '',
             'orc' => $this->orc,
-            'created_at' => $this->data,
-            'updated_at' => $this->atualizado,
+            'situacao_id' => $situacao_id,
+            'subtotal' => $subtotal,
+            'total' => $total,
         ];
     }
 }

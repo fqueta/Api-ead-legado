@@ -191,6 +191,20 @@ GET/PUT/DEL /api/v1/turmas/{id}
 
 Inclui relacionamento `curso`.
 
+### Exportar turmas (CSV)
+```
+GET /api/v1/turmas/export
+```
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `id_curso` | int | Filtrar por curso |
+| `ativo` | string | `s`/`n` |
+| `data_inicio` | date | Filtrar por data início (>=) |
+| `data_fim` | date | Filtrar por data início (<=) |
+
+**Resposta:** CSV com BOM, colunas: ID, Curso, Turma, Início, Fim, Data Início, Máx. Alunos, Matriculados, Ativo.
+
 ---
 
 ## Matrículas
@@ -213,6 +227,90 @@ GET/PUT/DEL /api/v1/matriculas/{id}
 
 Inclui relacionamentos `cliente`, `curso`, `turma`.
 
+### Obter matrícula
+```
+GET /api/v1/matriculas/{id}
+```
+`{id}` pode ser ID numérico ou `token`.
+
+**Resposta:**
+```json
+{
+    "ativo": "s",
+    "desconto": "0.00",
+    "id": "1",
+    "id_cliente": "019ee1b0-6bd0-706d-bb09-2454201e71e8",
+    "id_consultor": "019eb0af-8aac-7215-9fec-3419ce303cc6",
+    "id_curso": "2",
+    "id_responsavel": "019eb0af-8aac-7215-9fec-3419ce303cc6",
+    "id_turma": "0",
+    "inscricao": "0.00",
+    "meta": {
+        "gera_valor": "",
+        "parcelada": false,
+        "parcelas": "12",
+        "texto_desconto": "",
+        "validade": "14"
+    },
+    "obs": "",
+    "orc": [],
+    "situacao_id": "17",
+    "subtotal": "249.00",
+    "total": "249.00"
+}
+```
+
+### Listar matrículas
+```
+GET /api/v1/matriculas
+```
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `per_page` | int | Itens por página (padrão 15) |
+| `id_cliente` | int | Filtrar por cliente |
+| `id_curso` | int | Filtrar por curso |
+| `id_turma` | int | Filtrar por turma |
+| `status` | string | Filtrar por status |
+| `ativo` | string | `s`/`n` |
+
+**Resposta:** array paginado com formato `{success: true, total: X, data: [...]}` onde cada item no `data` segue o mesmo formato do endpoint `GET /api/v1/matriculas/{id}` acima.
+
+Inclui relacionamentos `cliente`, `curso`, `turma`.
+
+### Exportar matrículas (JSON)
+```
+GET /api/v1/matriculas/export
+```
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `id_cliente` | int | Filtrar por cliente |
+| `id_curso` | int | Filtrar por curso |
+| `id_turma` | int | Filtrar por turma |
+| `status` | string | Filtrar por status |
+| `ativo` | string | `s`/`n` |
+
+**Resposta:**
+```json
+{
+    "success": true,
+    "total": 699,
+    "data": [
+        {
+            "id_antigo": "1",
+            "id_turma": null,
+            "user_email": "andre.fialho.br@gmail.com",
+            "course_id_wp": "11427",
+            "status": "completed",
+            "start_at": "2020-07-16 23:35:51",
+            "end_at": null,
+            "order_id_wp": ""
+        }
+    ]
+}
+```
+
 ---
 
 ## Clientes
@@ -231,6 +329,18 @@ GET/PUT/DEL /api/v1/clientes/{id}
 | `search` | string | Busca em nome, sobrenome, email, CPF |
 
 Busca por ID, `token`, CPF ou email.
+
+### Exportar clientes (CSV)
+```
+GET /api/v1/clientes/export
+```
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `ativo` | string | `s`/`n` |
+| `search` | string | Busca em nome, sobrenome, email, CPF |
+
+**Resposta:** CSV com BOM, colunas: ID, Nome, Sobrenome, E-mail, CPF, Celular, Telefone, Endereço, Número, Bairro, Cidade, UF, CEP, Data Nascimento, Estado Civil, Profissão, Ativo, Criado em.
 
 ---
 
