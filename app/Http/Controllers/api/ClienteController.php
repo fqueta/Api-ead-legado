@@ -119,9 +119,18 @@ class ClienteController extends Controller
         return new ClienteResource($cliente);
     }
 
+    /**
+     * Exporta em JSON apenas clientes não excluídos com vínculo ativo em matrículas.
+     */
     public function export(Request $request)
     {
-        $query = Cliente::where('excluido', 'n')->where('deletado', 'n');
+        $query = Cliente::where('excluido', 'n')
+            ->where('deletado', 'n')
+            ->whereHas('matriculas', function ($q) {
+                $q->where('excluido', 'n')
+                    ->where('deletado', 'n')
+                    ->where('status', '>', '1');
+            });
 
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);
@@ -138,65 +147,46 @@ class ClienteController extends Controller
             });
         }
 
-        $clientes = $query->orderBy('Nome')->get();
-
         $headers = [
-            'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="clientes.csv"',
+            'Content-Type' => 'application/json; charset=utf-8',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
         ];
 
-        $callback = function () use ($clientes) {
-            $output = fopen('php://output', 'w');
-            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        @set_time_limit(0);
+        @ini_set('output_buffering', 'off');
+        @ini_set('zlib.output_compression', '0');
 
-            fputcsv($output, [
-                'ID',
-                'Nome',
-                'Sobrenome',
-                'E-mail',
-                'CPF',
-                'Celular',
-                'Telefone',
-                'Endereço',
-                'Número',
-                'Bairro',
-                'Cidade',
-                'UF',
-                'CEP',
-                'Data Nascimento',
-                'Estado Civil',
-                'Profissão',
-                'Ativo',
-                'Criado em',
-            ]);
+        $total = (clone $query)->count();
+        $streamQuery = clone $query;
 
-            foreach ($clientes as $cliente) {
-                fputcsv($output, [
-                    $cliente->id,
-                    $cliente->Nome,
-                    $cliente->sobrenome,
-                    $cliente->Email ?? $cliente->email,
-                    $cliente->Cpf ?? $cliente->cpf,
-                    $cliente->Celular,
-                    $cliente->Tel ?? $cliente->Telefone,
-                    $cliente->Endereco,
-                    $cliente->Numero,
-                    $cliente->Bairro,
-                    $cliente->Cidade,
-                    $cliente->Uf,
-                    $cliente->Cep,
-                    $cliente->DtNasc2 ? date('d/m/Y', strtotime($cliente->DtNasc2)) : '',
-                    $cliente->estado_civil,
-                    $cliente->profissao,
-                    $cliente->ativo === 's' ? 'Sim' : 'Não',
-                    $cliente->data ? date('d/m/Y H:i', strtotime($cliente->data)) : '',
-                ]);
-            }
-
-            fclose($output);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return response()->streamJson([
+            'success' => true,
+            'total' => $total,
+            'data' => $streamQuery->orderBy('Nome')->cursor()->map(function ($cliente) {
+                return [
+                    'id' => $cliente->id,
+                    'nome' => $cliente->Nome,
+                    'sobrenome' => $cliente->sobrenome,
+                    'email' => $cliente->Email ?? $cliente->email,
+                    'cpf' => $cliente->Cpf ?? $cliente->cpf,
+                    'celular' => $cliente->Celular,
+                    'telefone' => $cliente->Tel ?? $cliente->Telefone,
+                    'endereco' => $cliente->Endereco,
+                    'numero' => $cliente->Numero,
+                    'bairro' => $cliente->Bairro,
+                    'cidade' => $cliente->Cidade,
+                    'uf' => $cliente->Uf,
+                    'cep' => $cliente->Cep,
+                    'data_nascimento' => $cliente->DtNasc2 ? date('d/m/Y', strtotime($cliente->DtNasc2)) : '',
+                    'estado_civil' => $cliente->estado_civil,
+                    'profissao' => $cliente->profissao,
+                    'ativo' => $cliente->ativo === 's',
+                    'criado_em' => $cliente->data ? date('d/m/Y H:i', strtotime($cliente->data)) : '',
+                ];
+            }),
+        ], 200, $headers);
     }
 
     public function destroy($id): \Illuminate\Http\JsonResponse

@@ -343,7 +343,7 @@ GET/PUT/DEL /api/v1/clientes/{id}
 
 Busca por ID, `token`, CPF ou email.
 
-### Exportar clientes (CSV)
+### Exportar clientes (JSON)
 ```
 GET /api/v1/clientes/export
 ```
@@ -353,7 +353,7 @@ GET /api/v1/clientes/export
 | `ativo` | string | `s`/`n` |
 | `search` | string | Busca em nome, sobrenome, email, CPF |
 
-**Resposta:** CSV com BOM, colunas: ID, Nome, Sobrenome, E-mail, CPF, Celular, Telefone, Endereço, Número, Bairro, Cidade, UF, CEP, Data Nascimento, Estado Civil, Profissão, Ativo, Criado em.
+**Resposta:** JSON sem paginação com `success`, `total` e `data`, retornando apenas clientes não excluídos que possuam matrícula não excluída com `status > 1`.
 
 ---
 
