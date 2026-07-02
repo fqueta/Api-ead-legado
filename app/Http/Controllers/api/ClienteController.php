@@ -125,12 +125,7 @@ class ClienteController extends Controller
     public function export(Request $request)
     {
         $query = Cliente::where('excluido', 'n')
-            ->where('deletado', 'n')
-            ->whereHas('matriculas', function ($q) {
-                $q->where('excluido', 'n')
-                    ->where('deletado', 'n')
-                    ->where('status', '>', '1');
-            });
+            ->where('deletado', 'n');
 
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);

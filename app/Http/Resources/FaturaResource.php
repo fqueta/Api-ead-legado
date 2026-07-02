@@ -17,10 +17,10 @@ class FaturaResource extends JsonResource
             'ref_compra' => $this->ref_compra,
             'categoria' => $this->categoria,
             'local' => $this->local,
-            'vencimento' => $this->vencimento ? $this->vencimento->format('Y-m-d') : null,
+            'vencimento' => $this->formatDate($this->vencimento),
             'valor' => $this->valor ? (string) $this->valor : '0.00',
             'pago' => $this->pago === 's',
-            'data_pagamento' => $this->data_pagamento ? $this->data_pagamento->format('Y-m-d H:i:s') : null,
+            'data_pagamento' => $this->formatDate($this->data_pagamento, 'Y-m-d H:i:s'),
             'descricao' => $this->descricao ?? '',
             'conta' => $this->conta,
             'tipo' => $this->tipo,
@@ -42,5 +42,13 @@ class FaturaResource extends JsonResource
                 'cpf' => $this->cliente->Cpf ?? $this->cliente->cpf,
             ]),
         ];
+    }
+
+    private function formatDate($value, string $format = 'Y-m-d'): ?string
+    {
+        if (empty($value) || $value === '0000-00-00' || $value === '0000-00-00 00:00:00') {
+            return null;
+        }
+        return date($format, strtotime($value)) ?: null;
     }
 }

@@ -145,4 +145,25 @@ class CursoController extends Controller
 
         return response()->json(['message' => 'Curso excluído com sucesso']);
     }
+
+    public function export(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $query = Curso::where('excluido', 'n')->where('deletado', 'n');
+
+        if ($request->filled('ativo')) {
+            $query->where('ativo', $request->ativo);
+        }
+
+        if ($request->filled('categoria')) {
+            $query->where('categoria', $request->categoria);
+        }
+
+        $cursos = $query->orderBy('nome')->get();
+
+        return response()->json([
+            'success' => true,
+            'total' => $cursos->count(),
+            'data' => CursoResource::collection($cursos)->toArray($request),
+        ]);
+    }
 }

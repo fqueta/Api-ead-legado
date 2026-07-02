@@ -94,10 +94,10 @@ class FaturaController extends Controller
                 'categoria' => $fatura->categoria,
                 'local' => $fatura->local,
                 'descricao' => $fatura->descricao ?? '',
-                'vencimento' => $fatura->vencimento?->format('Y-m-d') ?? '',
+                'vencimento' => $this->formatDate($fatura->vencimento),
                 'valor' => $fatura->valor ? (string) $fatura->valor : '0.00',
                 'pago' => $fatura->pago === 's' ? 'Sim' : 'Não',
-                'data_pagamento' => $fatura->data_pagamento?->format('Y-m-d H:i:s') ?? '',
+                'data_pagamento' => $this->formatDate($fatura->data_pagamento, 'Y-m-d H:i:s'),
                 'conta' => $fatura->conta,
                 'tipo' => $fatura->tipo,
             ];
@@ -108,5 +108,28 @@ class FaturaController extends Controller
             'total' => $data->count(),
             'data' => $data,
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        abort(501, 'Not implemented');
+    }
+
+    public function update(Request $request, $id)
+    {
+        abort(501, 'Not implemented');
+    }
+
+    public function destroy($id)
+    {
+        abort(501, 'Not implemented');
+    }
+
+    private function formatDate($value, string $format = 'Y-m-d'): string
+    {
+        if (empty($value) || $value === '0000-00-00' || $value === '0000-00-00 00:00:00') {
+            return '';
+        }
+        return date($format, strtotime($value)) ?: '';
     }
 }

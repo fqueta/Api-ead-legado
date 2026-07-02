@@ -104,6 +104,7 @@ Route::name('api.')->prefix('api/v1')->middleware([
     })->middleware(TokenQueryParameter::class);
 
     Route::middleware([TokenQueryParameter::class, 'auth:sanctum'])->group(function () {
+        Route::get('/cursos/export', [CursoController::class, 'export'])->name('cursos.export');
         Route::get('/cursos', [CursoController::class, 'index']);
         Route::get('/cursos/{id}', [CursoController::class, 'show']);
         Route::post('/add-presenca-massa', [Escola::class,'add_presenca'])->name('add_presenca');

@@ -19,8 +19,6 @@ class Fatura extends Model
     ];
 
     protected $casts = [
-        'vencimento' => 'date',
-        'data_pagamento' => 'datetime',
         'valor' => 'float',
         'reg_asaas' => 'array',
     ];
