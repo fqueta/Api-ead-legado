@@ -27,6 +27,8 @@ class Matricula extends Model
     protected $casts = [
         'orc' => 'array',
         'config' => 'array',
+        'reg_pagamento' => 'array',
+        'reg_inscricao' => 'array',
         'data_inicio' => 'datetime',
         'validade' => 'datetime',
     ];
