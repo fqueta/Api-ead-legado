@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Http\Controllers\api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\FaturaResource;
+use App\Models\Fatura;
+use Illuminate\Http\Request;
+
+class FaturaController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = Fatura::with(['matricula', 'cliente']);
+
+        if ($request->filled('id_cliente')) {
+            $query->where('id_cliente', $request->id_cliente);
+        }
+
+        if ($request->filled('ref_compra')) {
+            $query->where('ref_compra', $request->ref_compra);
+        }
+
+        if ($request->filled('pago')) {
+            $query->where('pago', $request->pago === 'true' || $request->pago === '1' ? 's' : 'n');
+        }
+
+        if ($request->filled('categoria')) {
+            $query->where('categoria', $request->categoria);
+        }
+
+        if ($request->filled('vencimento_de')) {
+            $query->whereDate('vencimento', '>=', $request->vencimento_de);
+        }
+
+        if ($request->filled('vencimento_ate')) {
+            $query->whereDate('vencimento', '<=', $request->vencimento_ate);
+        }
+
+        $faturas = $query->orderBy('vencimento', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($request->per_page ?? 15);
+
+        return FaturaResource::collection($faturas);
+    }
+
+    public function show($id)
+    {
+        $fatura = Fatura::with(['matricula', 'cliente'])->findOrFail($id);
+
+        return new FaturaResource($fatura);
+    }
+
+    /**
+     * Exporta todas as faturas com dados da matrícula e cliente.
+     */
+    public function export(Request $request)
+    {
+        $query = Fatura::with(['matricula', 'cliente']);
+
+        if ($request->filled('id_cliente')) {
+            $query->where('id_cliente', $request->id_cliente);
+        }
+
+        if ($request->filled('ref_compra')) {
+            $query->where('ref_compra', $request->ref_compra);
+        }
+
+        if ($request->filled('pago')) {
+            $query->where('pago', $request->pago === 'true' || $request->pago === '1' ? 's' : 'n');
+        }
+
+        if ($request->filled('vencimento_de')) {
+            $query->whereDate('vencimento', '>=', $request->vencimento_de);
+        }
+
+        if ($request->filled('vencimento_ate')) {
+            $query->whereDate('vencimento', '<=', $request->vencimento_ate);
+        }
+
+        $faturas = $query->orderBy('vencimento', 'desc')->orderBy('id', 'desc')->get();
+
+        $data = $faturas->map(function ($fatura) {
+            return [
+                'id' => $fatura->id,
+                'id_cliente' => $fatura->id_cliente,
+                'cliente_nome' => $fatura->cliente?->Nome ?? '',
+                'cliente_email' => $fatura->cliente?->Email ?? $fatura->cliente?->email ?? '',
+                'cliente_cpf' => $fatura->cliente?->Cpf ?? $fatura->cliente?->cpf ?? '',
+                'ref_compra' => $fatura->ref_compra,
+                'matricula_id' => $fatura->matricula?->id ?? '',
+                'matricula_status' => $fatura->matricula?->status ?? '',
+                'curso_id' => $fatura->matricula?->id_curso ?? '',
+                'categoria' => $fatura->categoria,
+                'local' => $fatura->local,
+                'descricao' => $fatura->descricao ?? '',
+                'vencimento' => $fatura->vencimento?->format('Y-m-d') ?? '',
+                'valor' => $fatura->valor ? (string) $fatura->valor : '0.00',
+                'pago' => $fatura->pago === 's' ? 'Sim' : 'Não',
+                'data_pagamento' => $fatura->data_pagamento?->format('Y-m-d H:i:s') ?? '',
+                'conta' => $fatura->conta,
+                'tipo' => $fatura->tipo,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'total' => $data->count(),
+            'data' => $data,
+        ]);
+    }
+}

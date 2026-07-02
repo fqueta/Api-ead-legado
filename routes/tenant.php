@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\ClienteController;
 use App\Http\Controllers\api\CursoController;
+use App\Http\Controllers\api\FaturaController;
 use App\Http\Controllers\api\MatriculaController;
 use App\Http\Controllers\api\TurmaController;
 use App\Http\Controllers\TesteController;
@@ -115,6 +116,8 @@ Route::name('api.')->prefix('api/v1')->middleware([
         Route::apiResource('turmas', TurmaController::class);
         Route::get('/matriculas/export', [MatriculaController::class, 'export'])->name('matriculas.export');
         Route::apiResource('matriculas', MatriculaController::class);
+        Route::get('/faturas/export', [FaturaController::class, 'export'])->name('faturas.export');
+        Route::apiResource('faturas', FaturaController::class);
         Route::get('/clientes/export', [ClienteController::class, 'export'])->name('clientes.export');
         Route::apiResource('clientes', ClienteController::class);
     });

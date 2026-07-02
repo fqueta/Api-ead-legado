@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Matricula extends Model
 {
@@ -47,5 +48,10 @@ class Matricula extends Model
     public function turma(): BelongsTo
     {
         return $this->belongsTo(Turma::class, 'id_turma');
+    }
+
+    public function faturas(): HasMany
+    {
+        return $this->hasMany(Fatura::class, 'ref_compra', 'token');
     }
 }
